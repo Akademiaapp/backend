@@ -1,0 +1,19 @@
+{
+  "name": "collaboration",
+  "version": "0.0.1",
+  "description": "Akademia app collaboration backend",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "node --loader ts-node/esm index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@hocuspocus/server": "^2.8.1"
+  }
+}
