@@ -4,16 +4,16 @@
   "description": "Akademia app collaboration backend",
   "main": "index.ts",
   "scripts": {
-    "dev": "node --loader ts-node/esm index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.ts"
   },
-  "author": "",
+  "type": "module",
   "license": "ISC",
-  "devDependencies": {
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
-  },
   "dependencies": {
-    "@hocuspocus/server": "^2.8.1"
+    "@hocuspocus/extension-database": "^2.8.1",
+    "@hocuspocus/server": "^2.8.1",
+    "@prisma/client": "^5.7.1"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.1"
   }
 }
