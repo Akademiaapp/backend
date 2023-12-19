@@ -128,7 +128,7 @@ model authorizer_webhooks {
 }
 
 model documents {
-  name       String @id
+  name       String            @id
   user       authorizer_users? @relation(fields: [user_id], references: [id])
   user_id    String?           @db.Char(36)
   data       Bytes?
