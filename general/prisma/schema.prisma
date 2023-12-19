@@ -83,6 +83,7 @@ model authorizer_users {
   updated_at                   BigInt?
   created_at                   BigInt?
   app_data                     String?
+  user_settings                Json?
   documents                    documents[]
 
   @@index([phone_number], map: "idx_authorizer_users_phone_number")
