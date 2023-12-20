@@ -10,6 +10,10 @@ BigInt.prototype.toJSON = function () {
   return this.toString(); // Simply converts bigints to strings
 };
 
+prisma.$connect().then(() => {
+  console.log("Prisma connected");
+});
+
 // Configure the server …
 const server = new Hocuspocus({
   port: 8090,
