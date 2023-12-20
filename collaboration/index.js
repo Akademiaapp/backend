@@ -1,7 +1,7 @@
 import { Hocuspocus } from "@hocuspocus/server";
 import { Database } from "@hocuspocus/extension-database";
 
-import verifyToken from "./middleware.js";
+import verifyToken from "./middleware";
 
 // Prisma
 import { PrismaClient } from "@prisma/client";

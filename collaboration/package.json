@@ -2,9 +2,9 @@
   "name": "collaboration",
   "version": "0.0.1",
   "description": "Akademia app collaboration backend",
-  "main": "index.ts",
+  "main": "index.js",
   "scripts": {
-    "start": "node index.ts"
+    "start": "node index.js"
   },
   "type": "module",
   "license": "ISC",
