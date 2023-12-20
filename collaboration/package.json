@@ -11,7 +11,8 @@
   "dependencies": {
     "@hocuspocus/extension-database": "^2.8.1",
     "@hocuspocus/server": "^2.8.1",
-    "@prisma/client": "^5.7.1"
+    "@prisma/client": "^5.7.1",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "prisma": "^5.7.1"
