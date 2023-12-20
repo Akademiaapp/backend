@@ -25,7 +25,7 @@ const server = new Hocuspocus({
           prisma.documents.findFirst({ where: { name: documentName } }).then((document) => {
             console.log(document);
             if (!document) {
-                return resolve(new Uint8Array());
+                return resolve(null);
             }
             resolve(new Uint8Array(document.data));
           }).catch((err) => {
