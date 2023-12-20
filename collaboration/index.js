@@ -1,5 +1,4 @@
 import { Hocuspocus } from "@hocuspocus/server";
-import { Database } from "@hocuspocus/extension-database";
 
 import middleware from "./middleware.js";
 
@@ -61,42 +60,28 @@ const server = new Hocuspocus({
     // Return user id
     return user.id;
   },
-  extensions: [
-    new Database({
-      fetch: async ({ documentName }) => {
-        return new Promise((resolve, reject) => {
-          prisma.documents
-            .findFirst({ where: { name: documentName } })
-            .then((document) => {
-              if (!document) {
-                return resolve(null);
-              }
-              resolve(new Uint8Array(document.data));
-            })
-            .catch((err) => {
-              reject(err);
-            });
-        });
-      },
-      store: async ({ documentName, state }) => {
-        console.log(state);
-        return new Promise((resolve, reject) => {
-          prisma.documents
-            .upsert({
-              where: { name: documentName },
-              update: { data: state },
-              create: { name: documentName, data: state },
-            })
-            .then((document) => {
-              resolve();
-            })
-            .catch((err) => {
-              reject(err);
-            });
-        });
-      },
-    }),
-  ],
+  onLoadDocument: async (data) => {
+    console.log(data);
+    prisma.documents
+      .findFirst({ where: { name: documentName } })
+      .then((document) => {
+        if (!document) {
+          return data.document;
+        }
+        Y.applyUpdate(data.document, new Uint8Array(document.data));
+      })
+      .catch(() => {
+        return data.document;
+      });
+  },
+  onStoreDocument: async (data) => {
+    prisma.documents
+      .upsert({
+        where: { name: documentName },
+        update: { data: Buffer.from(Y.encodeStateAsUpdate(data.document)) },
+        create: { name: documentName, data: state },
+      })
+  },
 });
 
 // … and run it!
