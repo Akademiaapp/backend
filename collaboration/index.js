@@ -38,13 +38,13 @@ const server = new Hocuspocus({
 
     console.log(document);
 
-    if (!document) {
-      throw new Error("Unauthorized - Document not found");
-    }
-
     const user = await prisma.authorizer_users.findFirst({
       where: { id: decodedToken.sub },
     });
+
+    if (!document) {
+      return user.id;
+    }
 
     if (!user) {
       throw new Error("Unauthorized - User not found");
