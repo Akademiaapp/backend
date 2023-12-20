@@ -28,7 +28,6 @@ const server = new Hocuspocus({
     const decodedToken = middleware.verifyToken(token);
     if (!decodedToken) {
       throw new Error("Unauthorized - Token verification failed");
-      return;
     }
     console.log(decodedToken);
     
@@ -41,7 +40,6 @@ const server = new Hocuspocus({
 
     if (!document) {
       throw new Error("Unauthorized - Document not found");
-      return;
     }
 
     const user = await prisma.authorizer_users.findFirst({
@@ -50,12 +48,14 @@ const server = new Hocuspocus({
 
     if (!user) {
       throw new Error("Unauthorized - User not found");
-      return;
+    }
+    
+    if (document.user_id == null) {
+      return user.id;
     }
 
     if (document.user_id !== user.id) {
       throw new Error("Unauthorized - User does not have access to document");
-      return;
     }
 
     // Return user id
