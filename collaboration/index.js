@@ -79,6 +79,7 @@ const server = new Hocuspocus({
         });
       },
       store: async ({ documentName, state }) => {
+        console.log(state);
         return new Promise((resolve, reject) => {
           prisma.documents
             .upsert({
