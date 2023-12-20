@@ -13,7 +13,7 @@ BigInt.prototype.toJSON = function () {
 // Configure the server …
 const server = new Hocuspocus({
   port: 8090,
-  address: "localhost",
+  address: 'localhost',
   extensions: [
     new Database({
       fetch: async ({ documentName }) => {
