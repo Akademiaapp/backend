@@ -129,23 +129,22 @@ model authorizer_webhooks {
 }
 
 model documents {
-  name                String             @id @unique
-  user                authorizer_users?  @relation(fields: [user_id], references: [id])
-  user_id             String?            @db.Char(36)
-  data                Bytes?
-  document_members_id String[]
-  created_at          BigInt?
-  updated_at          BigInt?
-  document_members    document_members[]
+  name       String             @id @unique
+  user       authorizer_users   @relation(fields: [user_id], references: [id])
+  user_id    String             @db.Char(36)
+  data       Bytes?
+  members    document_members[]
+  created_at BigInt?
+  updated_at BigInt?
 }
 
 model document_members {
-  id               String            @id @db.Char(36)
-  document         documents?        @relation(fields: [document_id], references: [name])
-  document_id      String?           @db.VarChar(256)
-  user             authorizer_users? @relation(fields: [user_id], references: [id])
-  user_id          String?           @db.Char(36)
-  user_permissions String?
+  id               String           @id @unique @db.Uuid
+  user             authorizer_users @relation(fields: [user_id], references: [id])
+  user_id          String         @db.Char(36)
+  user_permissions String
   created_at       BigInt?
   updated_at       BigInt?
+  document         documents        @relation(fields: [document_name], references: [name])
+  document_name    String
 }
