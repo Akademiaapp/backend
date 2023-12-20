@@ -22,11 +22,15 @@ const server = new Hocuspocus({
     new Database({
       fetch: async ({ documentName }) => {
         return new Promise((resolve, reject) => {
-            prisma.documents.findFirst({ where: { name: documentName } }).then((document) => {
-                resolve(new Uint8Array(document.data));
-            }).catch((err) => {
-                reject(err);
-            })
+          prisma.documents.findFirst({ where: { name: documentName } }).then((document) => {
+            console.log(document);
+            if (!document) {
+                return resolve(new Uint8Array());
+            }
+            resolve(new Uint8Array(document.data));
+          }).catch((err) => {
+            reject(err);
+          })
         });
       },
       store: async ({ documentName, state }) => {
