@@ -1,7 +1,7 @@
 import { Hocuspocus } from "@hocuspocus/server";
 import { Database } from "@hocuspocus/extension-database";
 
-import { verifyToken } from "./middleware.js";
+import middleware from "./middleware.js";
 
 // Prisma
 import { PrismaClient } from "@prisma/client";
@@ -24,7 +24,7 @@ const server = new Hocuspocus({
     const { token } = data;
 
     // Check if token is valid
-    const decodedToken = verifyToken(token);
+    const decodedToken = middleware.verifyToken(token);
     if (!decodedToken) {
       throw new Error("Unauthorized - Token verification failed");
     } else {
