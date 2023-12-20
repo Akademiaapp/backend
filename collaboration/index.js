@@ -53,7 +53,7 @@ const server = new Hocuspocus({
       return;
     }
 
-    if (document.userId !== user.id) {
+    if (document.user_id !== user.id) {
       throw new Error("Unauthorized - User does not have access to document");
       return;
     }
