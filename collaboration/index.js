@@ -44,7 +44,7 @@ const server = new Hocuspocus({
       return;
     }
 
-    const user = await prisma.users.findFirst({
+    const user = await prisma.authorizer_users.findFirst({
       where: { id: decodedToken.sub },
     });
 
