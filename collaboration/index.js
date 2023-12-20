@@ -23,7 +23,6 @@ const server = new Hocuspocus({
       fetch: async ({ documentName }) => {
         return new Promise((resolve, reject) => {
           prisma.documents.findFirst({ where: { name: documentName } }).then((document) => {
-            console.log(document);
             if (!document) {
                 return resolve(null);
             }
