@@ -21,6 +21,7 @@ const server = new Hocuspocus({
   port: 8090,
   address: "localhost",
   onAuthenticate: async (data) => {
+    console.log(data)
     const { token } = data;
 
     // Check if token is valid
