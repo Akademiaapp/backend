@@ -20,7 +20,7 @@ prisma.$connect().then(() => {
 const server = new Hocuspocus({
   port: 8090,
   address: "localhost",
-  onAuthenticate: async(data) => {
+  onAuthenticate: async (data) => {
     const { token, documentName } = data;
 
     // Check if token is valid
@@ -28,7 +28,7 @@ const server = new Hocuspocus({
     if (!decodedToken) {
       throw new Error("Unauthorized - Token verification failed");
     }
-    
+
     // Check if user has access to document
     const document = await prisma.documents.findFirst({
       where: { name: documentName },
@@ -45,17 +45,24 @@ const server = new Hocuspocus({
     if (!user) {
       throw new Error("Unauthorized - User not found");
     }
-    
+
     if (document.user_id == null) {
       throw new Error("Unauthorized - Document has no owner");
     }
 
-    if (document.user_id !== user.id && document.permissions.) {
-      throw new Error("Unauthorized - User does not have access to document");
+    if (document.user_id !== user.id) {
+      if (
+        await prisma.document_permissions.findFirst({
+          where: { document_id: document.id, user_id: user.id },
+        })
+      ) {
+      } else {
+        throw new Error("Unauthorized - User does not have access to document");
+      }
     }
 
     // Return user id
-    data.context['user'] = user;
+    data.context["user"] = user;
     return {
       user: user,
     };
