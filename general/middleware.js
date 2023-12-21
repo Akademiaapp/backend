@@ -4,7 +4,8 @@ import jwt from "jsonwebtoken";
 
 // Middleware to verify JWT
 const verifyToken = async (req, res, next) => {
-  const token = req.headers.authorization;
+  // Get the bearer token
+  const token = req.headers["authorization"]?.split(" ")[1];
 
   if (!token) {
     return res

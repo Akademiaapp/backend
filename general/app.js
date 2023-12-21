@@ -7,6 +7,7 @@ import logger from "morgan";
 import middleware from "./middleware.js";
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
+import documentsRouter from "./routes/documents.js";
 
 import { fileURLToPath } from "url";
 
@@ -14,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Prisma
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../node_modules/.prisma/client/index.js";
 export const prisma = new PrismaClient();
 
 // Fix bigint issue 
@@ -38,6 +39,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/documents", documentsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -63,8 +63,8 @@ model authorizer_sessions {
 
 model authorizer_users {
   key                          String?
-  id                           String             @id @db.Char(36)
-  email                        String?            @unique
+  id                           String                 @id @db.Char(36)
+  email                        String?                @unique
   email_verified_at            BigInt?
   password                     String?
   signup_methods               String?
@@ -84,8 +84,8 @@ model authorizer_users {
   created_at                   BigInt?
   app_data                     String?
   user_settings                Json?
+  document_permissions         document_permissions[]
   documents                    documents[]
-  document_members             document_members[]
 
   @@index([phone_number], map: "idx_authorizer_users_phone_number")
 }
@@ -129,22 +129,25 @@ model authorizer_webhooks {
 }
 
 model documents {
-  name       String             @id @unique
-  user       authorizer_users   @relation(fields: [user_id], references: [id])
-  user_id    String             @db.Char(36)
-  data       Bytes?
-  members    document_members[]
-  created_at BigInt?
-  updated_at BigInt?
+  user_id     String                 @db.Char(36)
+  name        String                 @id @unique
+  data        Bytes?
+  created_at  BigInt?
+  updated_at  BigInt?
+  permissions document_permissions[]
+  user        authorizer_users       @relation(fields: [user_id], references: [id])
 }
 
-model document_members {
-  id               String           @id @unique @db.Uuid
-  user             authorizer_users @relation(fields: [user_id], references: [id])
-  user_id          String         @db.Char(36)
-  user_permissions String
-  created_at       BigInt?
-  updated_at       BigInt?
-  document         documents        @relation(fields: [document_name], references: [name])
-  document_name    String
+model document_permissions {
+  id            String           @id @default(uuid())
+  document_name String
+  user_id       String           @db.Char(36)
+  permission    Permission
+  document      documents        @relation(fields: [document_name], references: [name])
+  user          authorizer_users @relation(fields: [user_id], references: [id])
+}
+
+enum Permission {
+  READ
+  WRITE
 }

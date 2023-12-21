@@ -10,13 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@hocuspocus/server": "^2.8.1",
-    "@prisma/client": "^5.7.1",
-    "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
-    "prisma": "^5.7.1"
-  },
-  "prisma": {
-    "schema": "../prisma/schema.prisma"
+    "jsonwebtoken": "^9.0.2",
+    "yjs": "^13.6.10"
   }
 }
