@@ -67,8 +67,17 @@ router.put("/:name", function (req, res, next) {
 });
 
 // Delete document - Delete
-router.delete("/:name", function (req, res, next) {
+router.delete("/:name", async function (req, res, next) {
   const { name } = req.params;
+
+  // Check if the user has access to the document
+  const document = await prisma.documents.findFirst({
+    where: { name: name },
+  });
+  if (req.user.sub != document.user_id) {
+    throw new Error("Unauthorized - User does not have access to document");
+  }
+
   prisma.documents
     .delete({
       where: {
@@ -82,9 +91,18 @@ router.delete("/:name", function (req, res, next) {
 
 // Add user to document - Update
 // Create a new document_permissions for a user to the document
-router.put("/:name/users", function (req, res, next) {
+router.put("/:name/users", async function (req, res, next) {
   const { name } = req.params;
   const { user_id } = req.query;
+
+  // Check if the user has access to the document
+  const document = await prisma.documents.findFirst({
+    where: { name: name },
+  });
+  if (req.user.sub != document.user_id) {
+    throw new Error("Unauthorized - User does not have access to document");
+  }
+
   prisma.document_permissions
     .create({
       data: {
