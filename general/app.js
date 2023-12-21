@@ -3,6 +3,7 @@ import express from "express";
 import path from "path";
 import cookieParser from "cookie-parser";
 import logger from "morgan";
+import cors from "cors";
 
 import middleware from "./middleware.js";
 import indexRouter from "./routes/index.js";
@@ -28,6 +29,8 @@ var app = express();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
+
+app.use(cors()); // Enable CORS
 
 app.use(middleware.verifyToken); // Apply the middleware to all routes
 
