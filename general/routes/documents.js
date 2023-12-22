@@ -4,16 +4,30 @@ var router = express.Router();
 import { prisma } from "../app.js";
 
 // Get all users documents
-router.get("/", function (req, res, next) {
-  prisma.documents
+router.get("/", async function (req, res, next) {
+  const owned_documents = (await prisma.documents
     .findMany({
       where: {
         user_id: req.user.sub,
       },
-    })
-    .then((data) => {
-      res.json(data);
-    });
+  }));
+
+  const shared_documents = (await prisma.document_permissions.findMany({
+    where: {
+      user_id: req.user.sub,
+    },
+  }));
+
+  const test_document = (await prisma.documents.findFirst({
+    where: {
+      name: "Test",
+    },
+  }));
+
+  // Combine the owned_documents and shared_documents and test_document
+  const documents = owned_documents.concat(shared_documents).concat(test_document);
+
+  res.json(documents);
 });
 
 // Create document - Create
