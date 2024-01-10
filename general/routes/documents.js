@@ -20,7 +20,7 @@ router.get("/", async function (req, res, next) {
 
   const test_document = (await prisma.documents.findFirst({
     where: {
-      name: "Test",
+      id: "Test",
     },
   }));
 
@@ -49,12 +49,12 @@ router.post("/", function (req, res, next) {
 });
 
 // Get document - Read
-router.get("/:name", function (req, res, next) {
-  const { name } = req.params;
+router.get("/:id", function (req, res, next) {
+  const { id } = req.params;
   prisma.documents
     .findFirst({
       where: {
-        name: name,
+        id: id,
       },
     })
     .then((data) => {
@@ -63,13 +63,13 @@ router.get("/:name", function (req, res, next) {
 });
 
 // Rename document - Update
-router.put("/:name", function (req, res, next) {
-  const { name } = req.params;
+router.put("/:id", function (req, res, next) {
+  const { id } = req.params;
   const { new_name } = req.query;
   prisma.documents
     .update({
       where: {
-        name: name,
+        id: id,
       },
       data: {
         name: new_name,
@@ -81,12 +81,12 @@ router.put("/:name", function (req, res, next) {
 });
 
 // Delete document - Delete
-router.delete("/:name", async function (req, res, next) {
-  const { name } = req.params;
+router.delete("/:id", async function (req, res, next) {
+  const { id } = req.params;
 
   // Check if the user has access to the document
   const document = await prisma.documents.findFirst({
-    where: { name: name },
+    where: { id: id },
   });
   if (req.user.sub != document.user_id) {
     throw new Error("Unauthorized - User does not have access to document");
@@ -95,7 +95,7 @@ router.delete("/:name", async function (req, res, next) {
   prisma.documents
     .delete({
       where: {
-        name: name,
+        id: id,
       },
     })
     .then((data) => {
@@ -105,13 +105,13 @@ router.delete("/:name", async function (req, res, next) {
 
 // Add user to document - Update
 // Create a new document_permissions for a user to the document
-router.put("/:name/users", async function (req, res, next) {
-  const { name } = req.params;
+router.put("/:id/users", async function (req, res, next) {
+  const { id } = req.params;
   const { user_email } = req.query;
 
   // Check if the user has access to the document
   const document = await prisma.documents.findFirst({
-    where: { name: name },
+    where: { id: id },
   });
   if (req.user.sub != document.user_id) {
     throw new Error("Unauthorized - User does not have access to document");

@@ -31,7 +31,7 @@ const server = new Hocuspocus({
 
     // Check if user has access to document
     const document = await prisma.documents.findFirst({
-      where: { name: documentName },
+      where: { id: documentName },
     });
 
     const user = await prisma.authorizer_users.findFirst({
@@ -76,7 +76,7 @@ const server = new Hocuspocus({
   onLoadDocument: async (data) => {
     const { documentName } = data;
     prisma.documents
-      .findFirst({ where: { name: documentName } })
+      .findFirst({ where: { id: documentName } })
       .then((document) => {
         if (!document) {
           return data.document;
@@ -90,7 +90,7 @@ const server = new Hocuspocus({
   onStoreDocument: async (data) => {
     prisma.documents
       .update({
-        where: { name: data.documentName },
+        where: { id: data.documentName },
         data: { data: Buffer.from(Y.encodeStateAsUpdate(data.document)) },
       })
       .catch((err) => {

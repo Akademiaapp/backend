@@ -129,8 +129,9 @@ model authorizer_webhooks {
 }
 
 model documents {
+  id          String                 @id @default(uuid())
   user_id     String                 @db.Char(36)
-  name        String                 @id @unique
+  name        String
   data        Bytes?
   created_at  BigInt?
   updated_at  BigInt?
@@ -143,7 +144,7 @@ model document_permissions {
   document_name String
   user_id       String           @db.Char(36)
   permission    Permission
-  document      documents        @relation(fields: [document_name], references: [name])
+  document      documents        @relation(fields: [document_name], references: [id])
   user          authorizer_users @relation(fields: [user_id], references: [id])
 }
 
