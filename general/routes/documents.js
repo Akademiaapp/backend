@@ -125,7 +125,7 @@ router.put("/:id/users", async function (req, res, next) {
   prisma.document_permissions
     .create({
       data: {
-        document_name: name,
+        document_id: id,
         user_id: user.id,
         permission: "WRITE",
       },

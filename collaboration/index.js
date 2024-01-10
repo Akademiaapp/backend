@@ -22,6 +22,7 @@ const server = new Hocuspocus({
   address: "localhost",
   onAuthenticate: async (data) => {
     const { token, documentName } = data;
+    console.log("onAuthenticate", token, documentName)
 
     // Check if token is valid
     const decodedToken = middleware.verifyToken(token);

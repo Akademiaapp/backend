@@ -141,10 +141,10 @@ model documents {
 
 model document_permissions {
   id            String           @id @default(uuid())
-  document_name String
+  document_id String
   user_id       String           @db.Char(36)
   permission    Permission
-  document      documents        @relation(fields: [document_name], references: [id])
+  document      documents        @relation(fields: [document_id], references: [id])
   user          authorizer_users @relation(fields: [user_id], references: [id])
 }
 
