@@ -107,7 +107,7 @@ router.delete("/:name", async function (req, res, next) {
 // Create a new document_permissions for a user to the document
 router.put("/:name/users", async function (req, res, next) {
   const { name } = req.params;
-  const { user_id } = req.query;
+  const { user_email } = req.query;
 
   // Check if the user has access to the document
   const document = await prisma.documents.findFirst({
@@ -117,11 +117,16 @@ router.put("/:name/users", async function (req, res, next) {
     throw new Error("Unauthorized - User does not have access to document");
   }
 
+  // Get user_id from user_email
+  const user = await prisma.users.findFirst({
+    where: { email: user_email },
+  });
+
   prisma.document_permissions
     .create({
       data: {
         document_name: name,
-        user_id: user_id,
+        user_id: user.id,
         permission: "WRITE",
       },
     })
