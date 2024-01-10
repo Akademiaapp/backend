@@ -9,6 +9,7 @@ import middleware from "./middleware.js";
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
 import documentsRouter from "./routes/documents.js";
+import asignmentsRouter from "./routes/asignments.js";
 
 import { fileURLToPath } from "url";
 
@@ -43,6 +44,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/documents", documentsRouter);
+app.use("/assignments", asignmentsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
