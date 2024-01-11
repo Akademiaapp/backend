@@ -65,14 +65,14 @@ router.get("/:id", function (req, res, next) {
 // Rename document - Update
 router.put("/:id", function (req, res, next) {
   const { id } = req.params;
-  const { new_name } = req.query;
+  const { name } = req.query;
   prisma.documents
     .update({
       where: {
         id: id,
       },
       data: {
-        name: new_name,
+        name: name,
       },
     })
     .then((data) => {
