@@ -129,23 +129,23 @@ model authorizer_webhooks {
 }
 
 model documents {
-  id          String                 @id @default(uuid())
   user_id     String                 @db.Char(36)
   name        String
   data        Bytes?
   created_at  BigInt?
   updated_at  BigInt?
+  id          String                 @id @default(uuid())
   permissions document_permissions[]
   user        authorizer_users       @relation(fields: [user_id], references: [id])
 }
 
 model document_permissions {
-  id            String           @id @default(uuid())
+  id          String           @id @default(uuid())
+  user_id     String           @db.Char(36)
+  permission  Permission
   document_id String
-  user_id       String           @db.Char(36)
-  permission    Permission
-  document      documents        @relation(fields: [document_id], references: [id])
-  user          authorizer_users @relation(fields: [user_id], references: [id])
+  document    documents        @relation(fields: [document_id], references: [id])
+  user        authorizer_users @relation(fields: [user_id], references: [id])
 }
 
 enum Permission {

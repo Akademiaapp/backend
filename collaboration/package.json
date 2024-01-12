@@ -9,7 +9,7 @@
   "type": "module",
   "license": "ISC",
   "dependencies": {
-    "@hocuspocus/server": "^2.8.1",
+    "@hocuspocus/server": "^2.9.0",
     "jsonwebtoken": "^9.0.2",
     "yjs": "^13.6.10"
   }
