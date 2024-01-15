@@ -1,9 +1,10 @@
 import { Hocuspocus } from "@hocuspocus/server";
 
 import middleware from "./middleware.js";
+import * as Y from "yjs";
 
 // Prisma
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../node_modules/.prisma/client/index.js";
 export const prisma = new PrismaClient();
 
 // Fix bigint issue
@@ -20,50 +21,63 @@ const server = new Hocuspocus({
   port: 8090,
   address: "localhost",
   onAuthenticate: async (data) => {
-    console.log(data)
     const { token, documentName } = data;
+    console.log("onAuthenticate", token, documentName)
 
     // Check if token is valid
     const decodedToken = middleware.verifyToken(token);
     if (!decodedToken) {
       throw new Error("Unauthorized - Token verification failed");
     }
-    console.log(decodedToken);
-    
+
     // Check if user has access to document
     const document = await prisma.documents.findFirst({
-      where: { name: documentName },
+      where: { id: documentName },
     });
-
-    console.log(document);
 
     const user = await prisma.authorizer_users.findFirst({
       where: { id: decodedToken.sub },
     });
+    
+    if (documentName == "Test") {
+      return {
+        user: user,
+      };
+    }
 
     if (!document) {
-      return user.id;
+      throw new Error("Unauthorized - Document not found");
     }
 
     if (!user) {
       throw new Error("Unauthorized - User not found");
     }
-    
+
     if (document.user_id == null) {
-      return user.id;
+      throw new Error("Unauthorized - Document has no owner");
     }
 
     if (document.user_id !== user.id) {
-      throw new Error("Unauthorized - User does not have access to document");
+      if (
+        await prisma.document_permissions.findFirst({
+          where: { document_id: document.id, user_id: user.id },
+        })
+      ) {
+      } else {
+        throw new Error("Unauthorized - User does not have access to document");
+      }
     }
 
     // Return user id
-    return user.id;
+    data.context["user"] = user;
+    return {
+      user: user,
+    };
   },
   onLoadDocument: async (data) => {
-    console.log(data);
+    const { documentName } = data;
     prisma.documents
-      .findFirst({ where: { name: documentName } })
+      .findFirst({ where: { id: documentName } })
       .then((document) => {
         if (!document) {
           return data.document;
@@ -76,11 +90,13 @@ const server = new Hocuspocus({
   },
   onStoreDocument: async (data) => {
     prisma.documents
-      .upsert({
-        where: { name: documentName },
-        update: { data: Buffer.from(Y.encodeStateAsUpdate(data.document)) },
-        create: { name: documentName, data: state },
+      .update({
+        where: { id: data.documentName },
+        data: { data: Buffer.from(Y.encodeStateAsUpdate(data.document)) },
       })
+      .catch((err) => {
+        throw new Error(err);
+      });
   },
 });
 
