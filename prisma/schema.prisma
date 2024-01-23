@@ -86,6 +86,12 @@ model authorizer_users {
   user_settings                Json?
   document_permissions         document_permissions[]
   documents                    documents[]
+  class_id                     String?
+  class                        school_classes?                @relation(fields: [class_id], references: [id])
+  school_id                    String?
+  school                       schools?                @relation(fields: [school_id], references: [id])
+  assignments                  assignments[]
+  assignment_answers           assignment_answers[]
 
   @@index([phone_number], map: "idx_authorizer_users_phone_number")
 }
@@ -129,14 +135,16 @@ model authorizer_webhooks {
 }
 
 model documents {
-  user_id     String                 @db.Char(36)
-  name        String
-  data        Bytes?
-  created_at  BigInt?
-  updated_at  BigInt?
-  id          String                 @id @default(uuid())
-  permissions document_permissions[]
-  user        authorizer_users       @relation(fields: [user_id], references: [id])
+  user_id             String                 @db.Char(36)
+  name                String
+  data                Bytes?
+  created_at          BigInt?
+  updated_at          BigInt?
+  id                  String                 @id @default(uuid())
+  permissions         document_permissions[]
+  user                authorizer_users       @relation(fields: [user_id], references: [id])
+  assignments         assignments[]
+  assignment_answers  assignment_answers[]
 }
 
 model document_permissions {
@@ -148,7 +156,54 @@ model document_permissions {
   user        authorizer_users @relation(fields: [user_id], references: [id])
 }
 
+model schools {
+  id      String             @id @default(uuid())
+  name    String
+  address String
+  members authorizer_users[]
+  classes school_classes[]
+}
+
+model school_classes {
+  id        String             @id @default(uuid())
+  name      String
+  school    schools            @relation(fields: [school_id], references: [id])
+  school_id String
+  students  authorizer_users[]
+}
+
+model assignments {
+  id                     String                @id @default(uuid())
+  name                   String
+  teacher_id             String
+  teacher                authorizer_users      @relation(fields: [teacher_id], references: [id])
+  due_date               BigInt
+  created_at             BigInt?
+  assignment_document_id String
+  assignment_document    documents             @relation(fields: [assignment_document_id], references: [id])
+  assignment_answers     assignment_answers[]
+}
+
+model assignment_answers {
+  id            String           @id @default(uuid())
+  assignment_id String
+  assignment    assignments      @relation(fields: [assignment_id], references: [id])
+  student_id    String
+  student       authorizer_users @relation(fields: [student_id], references: [id])
+  status        assignment_status
+  document_id   String?
+  document      documents?        @relation(fields: [document_id], references: [id])
+}
+
+enum assignment_status {
+  NOT_STARTED
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+}
+
 enum Permission {
   READ
   WRITE
+  OWNER
 }
