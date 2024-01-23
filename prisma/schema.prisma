@@ -166,7 +166,7 @@ model schools {
 
 model school_classes {
   id        String             @id @default(uuid())
-  name      String
+  name      String             @max(255)
   school    schools            @relation(fields: [school_id], references: [id])
   school_id String
   students  authorizer_users[]
@@ -190,7 +190,7 @@ model assignment_answers {
   assignment    assignments      @relation(fields: [assignment_id], references: [id])
   student_id    String
   student       authorizer_users @relation(fields: [student_id], references: [id])
-  status        assignment_status
+  status        assignment_status @default(NOT_STARTED)
   document_id   String?
   document      documents?        @relation(fields: [document_id], references: [id])
 }
