@@ -9,7 +9,7 @@ import middleware from "./middleware.js";
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
 import documentsRouter from "./routes/documents.js";
-import asignmentsRouter from "./routes/asignments.js";
+import assignmentsRouter from "./routes/assignments.js";
 
 import { fileURLToPath } from "url";
 
@@ -33,6 +33,16 @@ app.set("view engine", "jade");
 
 app.use(cors()); // Enable CORS
 
+app.get('/test_colab', async (req, res, next) => {
+  const status = await fetch('http://localhost:8090/')
+  console.log(status);
+  if (status.statusText == "OK") {
+    res.status(200).json('All good');
+  } else {
+    res.status(500).json('Not good');
+  }
+});
+
 app.use(middleware.verifyToken); // Apply the middleware to all routes
 
 app.use(logger("dev"));
@@ -44,7 +54,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/documents", documentsRouter);
-app.use("/assignments", asignmentsRouter);
+app.use("/assignments", assignmentsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

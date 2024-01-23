@@ -5,27 +5,47 @@ import { prisma } from "../app.js";
 
 // Get all users documents
 router.get("/", async function (req, res, next) {
-  const owned_documents = (await prisma.documents
-    .findMany({
-      where: {
-        user_id: req.user.sub,
-      },
-  }));
-
-  const shared_documents = (await prisma.document_permissions.findMany({
+  const owned_documents = await prisma.documents.findMany({
     where: {
       user_id: req.user.sub,
     },
-  }));
+  });
 
-  const test_document = (await prisma.documents.findFirst({
+  const shared_documents = await prisma.document_permissions.findMany({
+    where: {
+      user_id: req.user.sub,
+    },
+  });
+
+  const test_document = await prisma.documents.findFirst({
     where: {
       id: "Test",
     },
-  }));
+  });
 
   // Combine the owned_documents and shared_documents and test_document
-  const documents = owned_documents.concat(shared_documents).concat(test_document);
+  const documents = owned_documents
+    .concat(shared_documents)
+    .concat(test_document);
+
+  // Remove duplicates
+  documents.filter((document, index) => {
+    return (
+      documents.findIndex((document2) => {
+        return document.id === document2.id;
+      }) === index
+    );
+  });
+
+  // Remove documents that have assignments
+  const assignments = await prisma.assignments.findMany();
+  assignments.forEach((assignment) => {
+    documents.forEach((document, index) => {
+      if (document.id === assignment.document_id) {
+        documents.splice(index, 1);
+      }
+    });
+  });
 
   res.json(documents);
 });
