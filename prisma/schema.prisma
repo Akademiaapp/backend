@@ -149,7 +149,7 @@ model documents {
 
 model document_permissions {
   id          String           @id @default(uuid())
-  user_id     String           @db.Char(36)
+  user_id     String           @db.Char(36) @unique()
   permission  Permission
   document_id String
   document    documents        @relation(fields: [document_id], references: [id])

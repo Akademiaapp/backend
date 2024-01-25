@@ -165,19 +165,51 @@ router.put("/:id/users", async function (req, res, next) {
 router.get("/:id/users", async function (req, res, next) {
   const { id } = req.params;
 
-  // Check if the user has access to the document
+  // Check if the user has access to the document, is the owner or has been shared the document
   const document = await prisma.documents.findFirst({
     where: { id: id },
   });
-  if (req.user.sub != document.user_id) {
-    throw new Error("Unauthorized - User does not have access to document");
+  if (
+    req.user.sub != document.user_id &&
+    !prisma.document_permissions.findFirst({
+      where: {
+        user_id: req.user.sub,
+        document_id: id,
+      },
+    })
+  ) {
+    res
+      .status(502)
+      .json("Unauthorized - User does not have access to document");
+    return;
   }
 
-  const users = await prisma.document_permissions.findMany({
+  const permissions = await prisma.document_permissions.findMany({
     where: {
       document_id: id,
     },
   });
+
+  // Get the actual users from permission
+  const users = [];
+  permissions.forEach(async (permission) => {
+    const user = await prisma.authorizer_users.findFirst({
+      where: {
+        id: permission.user_id,
+      },
+    });
+    user.permission = permission.permission;
+    users.push(user);
+  });
+
+  // Add the owner of the document
+  const owner = await prisma.authorizer_users.findFirst({
+    where: {
+      id: document.user_id,
+    },
+  });
+  owner.permission = "OWNER";
+  users.push(owner);
 
   res.json(users);
 });
