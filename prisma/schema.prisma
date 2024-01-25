@@ -166,7 +166,7 @@ model schools {
 
 model school_classes {
   id        String             @id @default(uuid())
-  name      String             @max(255)
+  name      String
   school    schools            @relation(fields: [school_id], references: [id])
   school_id String
   students  authorizer_users[]

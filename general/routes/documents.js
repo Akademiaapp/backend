@@ -71,6 +71,7 @@ router.post("/", function (req, res, next) {
 // Get document - Read
 router.get("/:id", function (req, res, next) {
   const { id } = req.params;
+  console.log(id);
   prisma.documents
     .findFirst({
       where: {
@@ -138,9 +139,14 @@ router.put("/:id/users", async function (req, res, next) {
   }
 
   // Get user_id from user_email
-  const user = await prisma.users.findFirst({
+  const user = await prisma.authorizer_users.findFirst({
     where: { email: user_email },
   });
+  console.log(user)
+  if (!user) {
+    res.status(502).json('User not found')
+
+  }
 
   prisma.document_permissions
     .create({
@@ -153,6 +159,27 @@ router.put("/:id/users", async function (req, res, next) {
     .then((data) => {
       res.json(data);
     });
+});
+
+// Get users with access to document - Read
+router.get("/:id/users", async function (req, res, next) {
+  const { id } = req.params;
+
+  // Check if the user has access to the document
+  const document = await prisma.documents.findFirst({
+    where: { id: id },
+  });
+  if (req.user.sub != document.user_id) {
+    throw new Error("Unauthorized - User does not have access to document");
+  }
+
+  const users = await prisma.document_permissions.findMany({
+    where: {
+      document_id: id,
+    },
+  });
+
+  res.json(users);
 });
 
 export default router;

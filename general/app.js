@@ -35,7 +35,6 @@ app.use(cors()); // Enable CORS
 
 app.get('/test_colab', async (req, res, next) => {
   const status = await fetch('http://localhost:8090/')
-  console.log(status);
   if (status.statusText == "OK") {
     res.status(200).json('All good');
   } else {
