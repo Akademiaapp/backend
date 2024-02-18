@@ -5,7 +5,7 @@ import { prisma } from "../app.js";
 
 // Get all users documents
 router.get("/", async function (req, res, next) {
-  const owned_documents = await prisma.documents.findMany({
+  const documents = await prisma.documents.findMany({
     where: {
       user_id: req.user.sub,
     },
@@ -17,16 +17,20 @@ router.get("/", async function (req, res, next) {
     },
   });
 
-  const test_document = await prisma.documents.findFirst({
+  // Get the actual documents from the document permissions and add them to the owned documents
+  shared_documents.forEach(async (document_permission) => {
+    documents.push(await prisma.documents.findFirst({
+      where: {
+        id: document_permission.document_id
+      }
+    }));
+  });
+
+  documents.push(await prisma.documents.findFirst({
     where: {
       id: "Test",
     },
-  });
-
-  // Combine the owned_documents and shared_documents and test_document
-  const documents = owned_documents
-    .concat(shared_documents)
-    .concat(test_document);
+  }));
 
   // Remove duplicates
   documents.filter((document, index) => {
