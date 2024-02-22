@@ -7,13 +7,32 @@ import { prisma } from "../app.js";
 router.get("/", function (req, res, next) {
   const user_id = req.user.sub;
   
+  let assignments = []
+
   prisma.assignment_answers.findMany({
     where: {
       student_id: user_id,
     },
   }).then((data) => {
-    res.json(data);
+    // Get the actual assignment from the assignment answer
+    data.forEach((assignment_status) => {
+      console.log("trying to get assignment: ", assignment_status)
+      prisma.assignments.findFirst({
+        where: {
+          id: assignment_status.assignment_id,
+        }
+      }).then((assignment) => {
+        console.log("got assignment: ", assignment)
+        assignments.push(assignment);
+      }).catch(() => {
+        console.log("Couldnt get assignment. Somethings fishy....")
+      });
+    });
   });
+
+  console.log("total assignments: ", assignments)
+
+  res.json(assignments);
 });
 
 // Create assignment - Create
