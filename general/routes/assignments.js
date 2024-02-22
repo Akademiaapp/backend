@@ -29,10 +29,14 @@ router.get("/", async function (req, res, next) {
     });
 
     const assignments = await Promise.all(assignmentPromises);
+
+    // Remove nulls
     const filteredAssignments = assignments.filter(assignment => assignment !== null);
+    // Clear duplicates
+    const uniqueAssignments = filteredAssignments.filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i);
 
     console.log("total assignments: ", filteredAssignments);
-    res.json(filteredAssignments);
+    res.json(uniqueAssignments);
   } catch (error) {
     console.error("Error retrieving assignments:", error);
     res.status(500).json({ error: "Internal Server Error" });
