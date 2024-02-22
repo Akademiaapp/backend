@@ -4,36 +4,41 @@ var router = express.Router();
 import { prisma } from "../app.js";
 
 // Get all users assignments
-router.get("/", function (req, res, next) {
+router.get("/", async function (req, res, next) {
   const user_id = req.user.sub;
   
-  let assignments = []
-
-  prisma.assignment_answers.findMany({
-    where: {
-      student_id: user_id,
-    },
-  }).then((data) => {
-    // Get the actual assignment from the assignment answer
-    data.forEach((assignment_status) => {
-      console.log("trying to get assignment: ", assignment_status)
-      prisma.assignments.findFirst({
-        where: {
-          id: assignment_status.assignment_id,
-        }
-      }).then((assignment) => {
-        console.log("got assignment: ", assignment)
-        assignments.push(assignment);
-      }).catch(() => {
-        console.log("Couldnt get assignment. Somethings fishy....")
-      });
+  try {
+    const assignmentAnswers = await prisma.assignment_answers.findMany({
+      where: {
+        student_id: user_id,
+      },
     });
-  });
 
-  console.log("total assignments: ", assignments)
+    const assignmentPromises = assignmentAnswers.map(async (assignment_status) => {
+      try {
+        const assignment = await prisma.assignments.findFirst({
+          where: {
+            id: assignment_status.assignment_id,
+          }
+        });
+        return assignment;
+      } catch (error) {
+        console.log("Couldn't get assignment. Something's fishy....");
+        return null;
+      }
+    });
 
-  res.json(assignments);
+    const assignments = await Promise.all(assignmentPromises);
+    const filteredAssignments = assignments.filter(assignment => assignment !== null);
+
+    console.log("total assignments: ", filteredAssignments);
+    res.json(filteredAssignments);
+  } catch (error) {
+    console.error("Error retrieving assignments:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
+
 
 // Create assignment - Create
 router.post("/", function (req, res, next) {
