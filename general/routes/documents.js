@@ -128,8 +128,16 @@ router.delete("/:id", async function (req, res, next) {
   // Check if the user has access to the document
   const document = await prisma.document.findFirst({
     where: { id: id },
+    include: {
+      permissions: true,
+    },
   });
-  if (req.user.sub != document.user_id) {
+
+  const permission = document.permissions.find((permission) => {
+    return permission.user_id == req.user.sub;
+  });
+
+  if (!permission && permission.permission != "OWNER") {
     throw new Error("Unauthorized - User does not have access to document");
   }
 
@@ -153,8 +161,16 @@ router.put("/:id/users", async function (req, res, next) {
   // Check if the user has access to the document
   const document = await prisma.document.findFirst({
     where: { id: id },
+    include: {
+      permissions: true,
+    },
   });
-  if (req.user.sub != document.user_id) {
+
+  const permission = document.permissions.find((permission) => {
+    return permission.user_id == req.user.sub;
+  });
+
+  if (!permission && permission.permission != "OWNER") {
     throw new Error("Unauthorized - User does not have access to document");
   }
 
@@ -188,9 +204,17 @@ router.get("/:id/users", async function (req, res, next) {
   // Check if the user has access to the document, is the owner or has been shared the document
   const document = await prisma.document.findFirst({
     where: { id: id },
+    include: {
+      permissions: true,
+    },
   });
+
+  const permission = document.permissions.find((permission) => {
+    return permission.user_id == req.user.sub;
+  });
+
   if (
-    req.user.sub != document.user_id &&
+    !permission &&
     !prisma.file_permission.findFirst({
       where: {
         user_id: req.user.sub,
