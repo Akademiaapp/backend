@@ -2,36 +2,31 @@ import express from "express";
 var router = express.Router();
 
 import { prisma } from "../app.js";
+import * as Y from "yjs"
+import { yDocToProsemirrorJSON } from "y-prosemirror";
 
 // Get all users documents
 router.get("/", async function (req, res, next) {
-  const documents = await prisma.documents.findMany({
+  const file_permissions = await prisma.file_permission.findMany({
     where: {
       user_id: req.user.sub,
     },
   });
 
-  const shared_documents = await prisma.document_permissions.findMany({
-    where: {
-      user_id: req.user.sub,
-    },
-  });
-
-  // Get the actual documents from the document permissions and add them to the owned documents
-  shared_documents.forEach(async (document_permission) => {
-    documents.push(await prisma.documents.findFirst({
-      where: {
-        id: document_permission.document_id
-      }
-    }));
-  });
-
-  documents.push(await prisma.documents.findFirst({
-    where: {
-      id: "Test",
-    },
-  }));
-
+  // Get the actual documents from the document permissions 
+  let documents = [];
+  for (let file_permission of file_permissions) {
+    try {
+      let document = await prisma.document.findFirst({
+        where: {
+          id: file_permission.document_id,
+        },
+      });
+      documents.push(document);
+    } catch (error) {
+      console.error("Error retrieving document:", error);
+    }
+  }
   // Remove duplicates
   documents.filter((document, index) => {
     return (
@@ -41,15 +36,7 @@ router.get("/", async function (req, res, next) {
     );
   });
 
-  // Remove documents that have assignments
-  const assignments = await prisma.assignments.findMany();
-  assignments.forEach((assignment) => {
-    documents.forEach((document, index) => {
-      if (document.id === assignment.document_id) {
-        documents.splice(index, 1);
-      }
-    });
-  });
+  console.log("total documents: ", documents);
 
   res.json(documents);
 });
@@ -57,18 +44,28 @@ router.get("/", async function (req, res, next) {
 // Create document - Create
 router.post("/", function (req, res, next) {
   const { name, user_id } = req.query;
-  prisma.documents
+  prisma.document
     .create({
       data: {
         name: name,
         data: Buffer.from(""),
         created_at: new Date().getTime(),
-        updated_at: new Date().getTime(),
-        user_id: user_id,
+        updated_at: new Date().getTime()
       },
     })
     .then((data) => {
-      res.json(data);
+      // Add the user to the document
+      prisma.file_permission
+        .create({
+          data: {
+            document_id: data.id,
+            user_id: user_id,
+            permission: "OWNER",
+          },
+        })
+        .then(() => {
+          res.json(data);
+        });
     });
 });
 
@@ -76,7 +73,7 @@ router.post("/", function (req, res, next) {
 router.get("/:id", function (req, res, next) {
   const { id } = req.params;
   console.log(id);
-  prisma.documents
+  prisma.document
     .findFirst({
       where: {
         id: id,
@@ -87,11 +84,30 @@ router.get("/:id", function (req, res, next) {
     });
 });
 
+// Get document json - Read
+router.get("/:id/json", function (req, res, next) {
+  const { id } = req.params;
+  prisma.document
+    .findFirst({
+      where: {
+        id: id,
+      },
+    })
+    .then((data) => {
+      console.log(data);
+      const ydoc = new Y.Doc()
+      ydoc.applyUpdate(data.data)
+      let json = yDocToProsemirrorJSON(yjsdoc);
+      console.log(json);
+      res.json(json);
+    });
+});
+
 // Rename document - Update
 router.put("/:id", function (req, res, next) {
   const { id } = req.params;
   const { name } = req.query;
-  prisma.documents
+  prisma.document
     .update({
       where: {
         id: id,
@@ -110,14 +126,14 @@ router.delete("/:id", async function (req, res, next) {
   const { id } = req.params;
 
   // Check if the user has access to the document
-  const document = await prisma.documents.findFirst({
+  const document = await prisma.document.findFirst({
     where: { id: id },
   });
   if (req.user.sub != document.user_id) {
     throw new Error("Unauthorized - User does not have access to document");
   }
 
-  prisma.documents
+  prisma.document
     .delete({
       where: {
         id: id,
@@ -135,7 +151,7 @@ router.put("/:id/users", async function (req, res, next) {
   const { user_email } = req.query;
 
   // Check if the user has access to the document
-  const document = await prisma.documents.findFirst({
+  const document = await prisma.document.findFirst({
     where: { id: id },
   });
   if (req.user.sub != document.user_id) {
@@ -152,7 +168,7 @@ router.put("/:id/users", async function (req, res, next) {
 
   }
 
-  prisma.document_permissions
+  prisma.file_permission
     .create({
       data: {
         document_id: id,
@@ -170,12 +186,12 @@ router.get("/:id/users", async function (req, res, next) {
   const { id } = req.params;
 
   // Check if the user has access to the document, is the owner or has been shared the document
-  const document = await prisma.documents.findFirst({
+  const document = await prisma.document.findFirst({
     where: { id: id },
   });
   if (
     req.user.sub != document.user_id &&
-    !prisma.document_permissions.findFirst({
+    !prisma.file_permission.findFirst({
       where: {
         user_id: req.user.sub,
         document_id: id,
@@ -188,7 +204,7 @@ router.get("/:id/users", async function (req, res, next) {
     return;
   }
 
-  const permissions = await prisma.document_permissions.findMany({
+  const permissions = await prisma.file_permission.findMany({
     where: {
       document_id: id,
     },
