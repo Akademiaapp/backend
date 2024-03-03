@@ -8,15 +8,15 @@ router.get("/", async function (req, res, next) {
   const user_id = req.user.sub;
   
   try {
-    const assignmentAnswers = await prisma.assignment_answers.findMany({
+    const assignmentAnswers = await prisma.file_permission.findMany({
       where: {
-        student_id: user_id,
+        user_id: user_id,
       },
     });
 
     const assignmentPromises = assignmentAnswers.map(async (assignment_status) => {
       try {
-        const assignment = await prisma.assignments.findFirst({
+        const assignment = await prisma.assignment.findFirst({
           where: {
             id: assignment_status.assignment_id,
           }
@@ -75,7 +75,7 @@ router.post("/", function (req, res, next) {
       }
 
       // Validate that the document exists
-      prisma.documents
+      prisma.document
         .findFirst({
           where: {
             id: document_id,
@@ -88,7 +88,7 @@ router.post("/", function (req, res, next) {
           }
         });
 
-      prisma.assignments
+      prisma.assignment
         .create({
           data: {
             name: name,
@@ -107,11 +107,11 @@ router.post("/", function (req, res, next) {
             })
             .then((students) => {
               students.forEach((student) => {
-                prisma.assignment_answers
+                prisma.file_permission
                   .create({
                     data: {
-                      assignment_id: assignment_data.id,
-                      student_id: student.id,
+                      document_id: assignment_data.id,
+                      user_id: student.id,
                       status: "NOT_STARTED",
                     },
                   });
