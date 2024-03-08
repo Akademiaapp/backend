@@ -146,8 +146,8 @@ model file_permission {
   user_id     String           @db.Char(36)
   permission  Permission
   document_id String
-  document    document        @relation(fields: [document_id], references: [id])
-  user        authorizer_users @relation(fields: [user_id], references: [id])
+  document    document        @relation(fields: [document_id], references: [id], onDelete: Cascade)
+  user        authorizer_users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 model school {
